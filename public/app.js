@@ -1,6 +1,120 @@
+const DEFAULT_DB = {
+  settings: {
+    brandName: "VELOURA",
+    brandSubtitle: "Maison de Fleurs • Dubai",
+    currency: "AED",
+    adminPassword: "dubai2026",
+    ownerWhatsapp: "+971500000001",
+    floristWhatsapp: "+971500000002",
+    paymentGatewayUrl: "",
+    greenApiIdInstance: "",
+    greenApiTokenInstance: ""
+  },
+  bouquets: [
+    {
+      id: "b1",
+      titleRu: "Royal Velvet — 51 Эквадорская роза",
+      titleEn: "Royal Velvet — 51 Ecuadorian Roses",
+      category: "roses",
+      price: 690,
+      floristCost: 440,
+      size: "L (60 см)",
+      compositionRu: "51 премиальная роза сорта Explorer / Freedom, дизайнерская матовая упаковка, атласная лента, кризал и фирменная открытка",
+      compositionEn: "51 premium Explorer/Freedom roses, luxury matte wrapping, satin ribbon, flower food & signature card",
+      badgeRu: "Хит в Дубае",
+      badgeEn: "Dubai Bestseller",
+      image: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=900&q=85",
+      paymentLink: "",
+      inStock: true
+    },
+    {
+      id: "b2",
+      titleRu: "White Mirage — Облако из гортензий и роз",
+      titleEn: "White Mirage — Hydrangea & Rose Cloud",
+      category: "hydrangea",
+      price: 550,
+      floristCost: 350,
+      size: "M (50 см)",
+      compositionRu: "3 пышные голландские белые гортензии, 15 белых роз Playa Blanca, эвкалипт Синерея",
+      compositionEn: "3 lush Dutch white hydrangeas, 15 Playa Blanca white roses, Cinerea eucalyptus",
+      badgeRu: "Нежность",
+      badgeEn: "Pure Elegance",
+      image: "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?auto=format&fit=crop&w=900&q=85",
+      paymentLink: "",
+      inStock: true
+    },
+    {
+      id: "b3",
+      titleRu: "Pink Desert — Пионовидные розы O'Hara",
+      titleEn: "Pink Desert — Peony Roses O'Hara",
+      category: "peony",
+      price: 620,
+      floristCost: 390,
+      size: "M (50 см)",
+      compositionRu: "25 ароматных французских пионовидных роз Pink O'Hara, кустовая роза Бомбастик, пудровая упаковка",
+      compositionEn: "25 fragrant French Pink O'Hara garden roses, Bombastic spray roses, blush wrap",
+      badgeRu: "Ароматный",
+      badgeEn: "Fragrant",
+      image: "https://images.unsplash.com/photo-1561181286-d3fee7d55364?auto=format&fit=crop&w=900&q=85",
+      paymentLink: "",
+      inStock: true
+    },
+    {
+      id: "b4",
+      titleRu: "Marina Sunset — Шляпная коробка Люкс",
+      titleEn: "Marina Sunset — Luxury Hat Box",
+      category: "boxes",
+      price: 780,
+      floristCost: 490,
+      size: "L (Коробка 35 см)",
+      compositionRu: "Пионовидные розы Kahala, ранункулюсы, орхидеи Цимбидиум, велюровая шляпная коробка с оазисом",
+      compositionEn: "Kahala roses, ranunculus, Cymbidium orchids in a velvet hat box with floral foam",
+      badgeRu: "В шляпной коробке",
+      badgeEn: "Hat Box",
+      image: "https://images.unsplash.com/photo-1563241527-3004b7be0ffd?auto=format&fit=crop&w=900&q=85",
+      paymentLink: "",
+      inStock: true
+    },
+    {
+      id: "b5",
+      titleRu: "Blush Harmony — Нежный комплимент",
+      titleEn: "Blush Harmony — Delicate Bouquet",
+      category: "peony",
+      price: 390,
+      floristCost: 240,
+      size: "S (40 см)",
+      compositionRu: "15 роз сорта Quicksand и Sweet Avalanche, лизиантус, матовая калька",
+      compositionEn: "15 Quicksand & Sweet Avalanche roses, eustoma, signature wrapping",
+      badgeRu: "Быстрая доставка",
+      badgeEn: "Express 90 min",
+      image: "https://images.unsplash.com/photo-1487530811176-3780de880c2d?auto=format&fit=crop&w=900&q=85",
+      paymentLink: "",
+      inStock: true
+    },
+    {
+      id: "b6",
+      titleRu: "Palm Imperial — 101 Премиум роза",
+      titleEn: "Palm Imperial — 101 Premium Roses",
+      category: "vip",
+      price: 1350,
+      floristCost: 850,
+      size: "VIP XL (70 см)",
+      compositionRu: "101 отборная эквадорская роза (красные, белые или нежно-розовые на выбор), премиум оформление",
+      compositionEn: "101 hand-picked Ecuadorian roses (red, white, or blush pink), couture wrapping",
+      badgeRu: "VIP коллекция",
+      badgeEn: "VIP Edition",
+      image: "https://images.unsplash.com/photo-1548094990-c16ca90f1f0d?auto=format&fit=crop&w=900&q=85",
+      paymentLink: "",
+      inStock: true
+    }
+  ],
+  orders: []
+};
+
 let state = {
   lang: 'ru',
   category: 'all',
+  hasBackend: true,
   settings: {},
   bouquets: [],
   orders: [],
@@ -42,19 +156,91 @@ const i18n = {
   }
 };
 
+function saveLocalFallback() {
+  localStorage.setItem('veloura_db_v1', JSON.stringify({
+    settings: state.settings,
+    bouquets: state.bouquets,
+    orders: state.orders
+  }));
+}
+
+function loadLocalFallback() {
+  try {
+    const raw = localStorage.getItem('veloura_db_v1');
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return JSON.parse(JSON.stringify(DEFAULT_DB));
+}
+
+function buildWaMeLinkClient(phone, text) {
+  const cleanPhone = (phone || '').replace(/[^\d]/g, '');
+  return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(text)}`;
+}
+
+function buildOwnerWaTextClient(order, settings) {
+  const profit = Number(order.price) - Number(order.floristCost || 0);
+  return [
+    `💰 *НОВЫЙ ОПЛАЧЕННЫЙ ЗАКАЗ #${order.orderNumber}*`,
+    `━━━━━━━━━━━━━━━━━━`,
+    `💐 *Букет:* ${order.bouquetTitle} (${order.bouquetSize || 'Стандарт'})`,
+    `💳 *Оплачено клиентом:* ${order.price} ${settings.currency}`,
+    `🌿 *Себестоимость (флористу):* ${order.floristCost} ${settings.currency}`,
+    `📈 *Ваша чистая прибыль:* +${profit} ${settings.currency}`,
+    `━━━━━━━━━━━━━━━━━━`,
+    `📍 *Район / Адрес (Дубай):* ${order.area} — ${order.address}`,
+    `⏰ *Время доставки:* ${order.deliveryDate}, ${order.deliveryTime}`,
+    `👤 *Заказчик:* ${order.customerName} (${order.customerPhone})`,
+    `🎁 *Получатель:* ${order.recipientName || 'Сам заказчик'} (${order.recipientPhone || order.customerPhone})`,
+    `💌 *Текст открытки:* ${order.cardText ? `«${order.cardText}»` : 'Без текста'}`,
+    `━━━━━━━━━━━━━━━━━━`,
+    `✅ Статус оплаты: *ОПЛАЧЕНО ОНЛАЙН (${order.paymentMethod})*`
+  ].join('\n');
+}
+
+function buildFloristWaTextClient(order, settings) {
+  return [
+    `🌸 *ЗАКАЗ В РАБОТУ #${order.orderNumber} (ОПЛАЧЕН)*`,
+    `━━━━━━━━━━━━━━━━━━`,
+    `💐 *Собрать букет:* ${order.bouquetTitle}`,
+    `📏 *Размер:* ${order.bouquetSize || 'По стандарту'}`,
+    `🌿 *Состав:* ${order.bouquetComposition || 'По фото каталога'}`,
+    `🖼 *Фото образца:* ${order.bouquetImage}`,
+    `💵 *К выплате вам за сборку:* ${order.floristCost} ${settings.currency}`,
+    `━━━━━━━━━━━━━━━━━━`,
+    `📍 *Куда доставить:* ${order.area}, ${order.address}`,
+    `⏰ *Дата и время:* ${order.deliveryDate} (${order.deliveryTime})`,
+    `🎁 *Получатель:* ${order.recipientName || order.customerName}`,
+    `📞 *Телефон получателя:* ${order.recipientPhone || order.customerPhone}`,
+    order.askRecipientAddress ? `⚠️ *Важно:* Уточнить точный адрес/локацию у получателя в WhatsApp!` : '',
+    `💌 *Подписать открытку:* ${order.cardText ? `«${order.cardText}»` : 'Пустая открытка (без текста)'}`,
+    `━━━━━━━━━━━━━━━━━━`,
+    `📸 *Пожалуйста, пришлите фото готового букета перед отправкой курьером!*`
+  ].filter(Boolean).join('\n');
+}
+
 async function initApp() {
   const today = new Date().toISOString().split('T')[0];
   const dateInput = document.getElementById('ordDate');
   if (dateInput) dateInput.value = today;
 
-  const res = await fetch('/api/bootstrap');
-  const data = await res.json();
-  state.settings = data.settings || {};
-  state.bouquets = data.bouquets || [];
-  state.orders = data.orders || [];
+  try {
+    const res = await fetch('/api/bootstrap');
+    if (!res.ok) throw new Error('Static mode');
+    const data = await res.json();
+    state.hasBackend = true;
+    state.settings = data.settings || {};
+    state.bouquets = data.bouquets || [];
+    state.orders = data.orders || [];
+  } catch (e) {
+    state.hasBackend = false;
+    const localData = loadLocalFallback();
+    state.settings = localData.settings;
+    state.bouquets = localData.bouquets;
+    state.orders = localData.orders;
+  }
 
   renderAll();
-  if (window.location.pathname === '/admin') {
+  if (window.location.pathname.endsWith('/admin')) {
     openAdminWithAuth();
   }
 }
@@ -65,18 +251,29 @@ async function openAdminWithAuth() {
   }
   const pass = prompt('Введите пароль владельца магазина (по умолчанию: dubai2026):', 'dubai2026');
   if (!pass) return;
-  const res = await fetch('/api/admin/login', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ password: pass })
-  });
-  const data = await res.json();
-  if (data.ok) {
-    state.isAdminAuthenticated = true;
-    sessionStorage.setItem('veloura_admin', '1');
-    switchView('admin');
+
+  if (state.hasBackend) {
+    const res = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pass })
+    });
+    const data = await res.json();
+    if (data.ok) {
+      state.isAdminAuthenticated = true;
+      sessionStorage.setItem('veloura_admin', '1');
+      switchView('admin');
+    } else {
+      alert('Неверный пароль!');
+    }
   } else {
-    alert('Неверный пароль!');
+    if (pass === (state.settings.adminPassword || 'dubai2026')) {
+      state.isAdminAuthenticated = true;
+      sessionStorage.setItem('veloura_admin', '1');
+      switchView('admin');
+    } else {
+      alert('Неверный пароль!');
+    }
   }
 }
 
@@ -257,29 +454,62 @@ async function submitOrderAndPay(e) {
     paymentMethod: state.selectedPaymentMethod
   };
 
-  try {
-    const res = await fetch('/api/orders', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    const data = await res.json();
-    btn.disabled = false;
-    btn.innerHTML = origHtml;
+  if (state.hasBackend) {
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      btn.disabled = false;
+      btn.innerHTML = origHtml;
 
-    if (data.ok && data.order) {
-      state.orders.unshift(data.order);
-      renderAll();
-      if (data.order.redirectPaymentUrl) {
-        window.open(data.order.redirectPaymentUrl, '_blank');
+      if (data.ok && data.order) {
+        state.orders.unshift(data.order);
+        renderAll();
+        if (data.order.redirectPaymentUrl) {
+          window.open(data.order.redirectPaymentUrl, '_blank');
+        }
+        showOrderSuccessModal(data.order);
       }
-      showOrderSuccessModal(data.order);
-    }
-  } catch (err) {
-    btn.disabled = false;
-    btn.innerHTML = origHtml;
-    alert('Ошибка при оформлении заказа');
+      return;
+    } catch (err) {}
   }
+
+  // Fallback for static hosting (GitHub Pages)
+  const b = state.activeBouquet;
+  const orderNumber = 1001 + state.orders.length;
+  const order = {
+    id: 'ord_' + Date.now(),
+    orderNumber,
+    createdAt: new Date().toISOString(),
+    bouquetId: b.id,
+    bouquetTitle: b.titleRu,
+    bouquetSize: b.size,
+    bouquetComposition: b.compositionRu,
+    bouquetImage: b.image,
+    price: Number(b.price),
+    floristCost: Number(b.floristCost),
+    profit: Number(b.price) - Number(b.floristCost),
+    ...payload,
+    address: payload.askRecipientAddress ? 'Уточнить у получателя по телефону/WhatsApp' : payload.address,
+    redirectPaymentUrl: b.paymentLink || state.settings.paymentGatewayUrl || ''
+  };
+  order.ownerWhatsappText = buildOwnerWaTextClient(order, state.settings);
+  order.floristWhatsappText = buildFloristWaTextClient(order, state.settings);
+  order.ownerWaLink = buildWaMeLinkClient(state.settings.ownerWhatsapp, order.ownerWhatsappText);
+  order.floristWaLink = buildWaMeLinkClient(state.settings.floristWhatsapp, order.floristWhatsappText);
+
+  state.orders.unshift(order);
+  saveLocalFallback();
+  btn.disabled = false;
+  btn.innerHTML = origHtml;
+  renderAll();
+  if (order.redirectPaymentUrl) {
+    window.open(order.redirectPaymentUrl, '_blank');
+  }
+  showOrderSuccessModal(order);
 }
 
 function showOrderSuccessModal(order) {
@@ -474,14 +704,26 @@ async function saveBouquet(e) {
     imageBase64
   };
 
-  const res = await fetch('/api/bouquets', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
-  const data = await res.json();
-  if (data.ok) {
-    state.bouquets = data.bouquets;
+  if (state.hasBackend) {
+    const res = await fetch('/api/bouquets', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.ok) {
+      state.bouquets = data.bouquets;
+      resetBouquetForm();
+      renderAll();
+    }
+  } else {
+    if (payload.id) {
+      const idx = state.bouquets.findIndex(b => b.id === payload.id);
+      if (idx !== -1) state.bouquets[idx] = { ...state.bouquets[idx], ...payload, image: imageBase64 || payload.image || state.bouquets[idx].image };
+    } else {
+      state.bouquets.unshift({ ...payload, id: 'b_' + Date.now(), image: imageBase64 || payload.image, inStock: true });
+    }
+    saveLocalFallback();
     resetBouquetForm();
     renderAll();
   }
@@ -489,10 +731,16 @@ async function saveBouquet(e) {
 
 async function deleteBouquet(id) {
   if (!confirm('Удалить этот букет с витрины?')) return;
-  const res = await fetch(`/api/bouquets/${id}`, { method: 'DELETE' });
-  const data = await res.json();
-  if (data.ok) {
-    state.bouquets = data.bouquets;
+  if (state.hasBackend) {
+    const res = await fetch(`/api/bouquets/${id}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.ok) {
+      state.bouquets = data.bouquets;
+      renderAll();
+    }
+  } else {
+    state.bouquets = state.bouquets.filter(b => b.id !== id);
+    saveLocalFallback();
     renderAll();
   }
 }
@@ -510,16 +758,23 @@ async function saveSettings(e) {
     greenApiTokenInstance: document.getElementById('setGreenToken').value.trim()
   };
 
-  const res = await fetch('/api/settings', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
-  const data = await res.json();
-  if (data.ok) {
-    state.settings = data.settings;
+  if (state.hasBackend) {
+    const res = await fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+    if (data.ok) {
+      state.settings = data.settings;
+      renderAll();
+      alert('Настройки магазина, пароль и номера WhatsApp сохранены!');
+    }
+  } else {
+    state.settings = { ...state.settings, ...payload };
+    saveLocalFallback();
     renderAll();
-    alert('Настройки магазина, пароль и номера WhatsApp сохранены!');
+    alert('Настройки сохранены!');
   }
 }
 
